@@ -2,9 +2,9 @@ openapi: 3.0.2
 info:
     title: Bank
     version: 1.0.0
-    description: Maarek Sillamäe bank
+    description: Maarek Sillamäe Karel Kivimägi bank
     contact:
-        name: Maarek Sillamäe
+        name: Maarek Sillamäe karel kivimägi
         email: maarek.sillamae@khk.ee
 servers:
     -
@@ -12,11 +12,7 @@ servers:
         description: Development Server
 paths:
     /api/user/register:
-        description: Demo Bank Open API 3.0 Swagger UI
-        servers:
-            -
-                url: 'http://localhost:1337'
-                description: Development server
+        description: ''
         post:
             requestBody:
                 description: User created
@@ -50,6 +46,9 @@ paths:
                             examples:
                                 userAlreadyExists:
                                     value: '{error: "All fields must be filled"}'
+                                passwordLenght:
+                                    value:
+                                        error: Password length must be 8 or more characters
                     description: All fields must be filled
                 '409':
                     content:
@@ -60,18 +59,118 @@ paths:
                                 usernameAlreadyExists:
                                     value: '{error: "Username already exists"}'
                     description: Username already exists
-                '411':
+                '500':
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/errorResponse'
                             examples:
-                                passwordLength:
+                                oopsSomethingWentWrong:
                                     value:
-                                        error: Password length must be 8 or more characters
-                    description: Password length must be 8 or more characters
+                                        error: Oops! Something went wrong
+                    description: Oops! Something went wrong
             summary: Register a new user
             description: Register a new user
+    /api/session/create-session:
+        post:
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/postSessionRequest'
+                required: true
+            tags:
+                - Session
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/postSessionResponse'
+                            examples:
+                                tokenHasBeenCreated:
+                                    value:
+                                        token: 5f9db108b8c28c40a42d94c4
+                    description: ''
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/postSessionResponse'
+                            examples:
+                                userAndPwRequired:
+                                    value:
+                                        error: Username and password required
+                                invalidUsernameOrPassword:
+                                    value:
+                                        error: Invalid username or password
+                    description: Invalid username or password
+                '500':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/postSessionResponse'
+                            examples:
+                                oopsSomethingWentWrong:
+                                    value:
+                                        error: Oops! Something went wrong
+                    description: Oops! Something went wrong
+            description: Create session token
+    /api/session/delete-session:
+        delete:
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/deleteSessionRequest'
+                required: true
+            tags:
+                - Session
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/postSessionResponse'
+                            examples:
+                                deleteToken:
+                                    value:
+                                        message: Token successfully deleted
+                    description: Deleted token
+                '401':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                missingAuthorizationHeader:
+                                    value:
+                                        error: Missing Authorization header
+                    description: Missing token
+                '404':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                sessionNotFound:
+                                    value:
+                                        error: Session not found
+                    description: Not found
+                '500':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                oopsSomethingWentWrong:
+                                    value:
+                                        error: Oops! Something went wrong
+                    description: Server error
+            security:
+                -
+                    Bearer: []
+            description: Delete session token
 components:
     schemas:
         postUsersRequest:
@@ -91,6 +190,10 @@ components:
                 username:
                     description: ''
                     type: string
+            example:
+                name: some text
+                password: some text
+                username: some text
         errorResponse:
             title: Error response
             description: Generic error response
@@ -101,3 +204,37 @@ components:
                     type: string
             example:
                 error: Error message
+        postSessionResponse:
+            description: ''
+            type: object
+            example:
+                token: 5f9db108b8c28c40a42d94c4
+        postSessionRequest:
+            description: ''
+            required:
+                - username
+                - password
+            type: object
+            properties:
+                username:
+                    description: ''
+                    type: string
+                password:
+                    description: ''
+                    type: string
+            example:
+                username: some text
+                password: some text
+        deleteSessionRequest:
+            description: ''
+            type: object
+            example: {}
+        deleteSessionResponse:
+            description: ''
+            type: object
+            example:
+                message: Token successfully deleted
+    securitySchemes:
+        Bearer:
+            scheme: bearer
+            type: http

@@ -8,22 +8,22 @@ const bcrypt = require('bcrypt');
 router.post('/register', async (req, res) => {
 
     try {
-         // check if email exists
-       const userNameExists = await User.findOne({username: req.body.username});
-       if(userNameExists) return res.status(409).json({error: "Username already exists"});
+        // check if email exists
+        const userNameExists = await User.findOne({username: req.body.username});
+        if(userNameExists) return res.status(409).json({error: "Username already exists"});
 
-    //Request body
-    const { name, username, password } = req.body;
-    if(!name || !username || !password) return res.status(400).json({error: "All fields must be filled"})
-    if(password.length < 8) {return res.status(411).json({error: "Password length must be 8 or more characters"})}
-  
-   // BCrypt Salt
-   const salt = await bcrypt.genSalt(10);
-   const hashedPassword = await bcrypt.hash(password, salt);
+        //Request body
+        const { name, username, password } = req.body;
+        if(!name || !username || !password) return res.status(400).json({error: "All fields must be filled"})
+        if(password.length < 8) {return res.status(400).json({error: "Password length must be 8 or more characters"})}
 
-   
-       const newUser = new User({name, username,password: hashedPassword });
-       const newAccount = new Account({ user: newUser._id});
+        // BCrypt Salt
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+
+        const newUser = new User({name, username,password: hashedPassword });
+        const newAccount = new Account({ user: newUser._id});
 
         const savedUser = await newUser.save();
         const savedAccount = await newAccount.save();
@@ -31,7 +31,8 @@ router.post('/register', async (req, res) => {
             message: "User saved"
         });
     } catch (err) {
-        res.status(400).json({error: err.message} );
+        res.status(500).json({error: "Oops! Something went wrong"} );
+        console.log(err.message);
     }
 });
 

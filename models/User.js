@@ -13,7 +13,7 @@ module.exports = mongoose.model('Users', new mongoose.Schema({
     password: {
         type: String,
         required: true,
-    
+
     },
     createdAt: {
         type: Date,
