@@ -1,0 +1,103 @@
+openapi: 3.0.2
+info:
+    title: Bank
+    version: 1.0.0
+    description: Maarek Sillamäe bank
+    contact:
+        name: Maarek Sillamäe
+        email: maarek.sillamae@khk.ee
+servers:
+    -
+        url: 'http://localhost:1337'
+        description: Development Server
+paths:
+    /api/user/register:
+        description: Demo Bank Open API 3.0 Swagger UI
+        servers:
+            -
+                url: 'http://localhost:1337'
+                description: Development server
+        post:
+            requestBody:
+                description: User created
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/postUsersRequest'
+                required: true
+            servers:
+                -
+                    url: 'http://localhost:1337'
+                    description: Development server
+            tags:
+                - User
+            responses:
+                '201':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/postUsersRequest'
+                            examples:
+                                userCreated:
+                                    value:
+                                        message: User saved
+                    description: User saved
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                userAlreadyExists:
+                                    value: '{error: "All fields must be filled"}'
+                    description: All fields must be filled
+                '409':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                usernameAlreadyExists:
+                                    value: '{error: "Username already exists"}'
+                    description: Username already exists
+                '411':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                passwordLength:
+                                    value:
+                                        error: Password length must be 8 or more characters
+                    description: Password length must be 8 or more characters
+            summary: Register a new user
+            description: Register a new user
+components:
+    schemas:
+        postUsersRequest:
+            description: ''
+            required:
+                - name
+                - password
+                - username
+            type: object
+            properties:
+                name:
+                    description: Full name
+                    type: string
+                password:
+                    description: Minimum 8 characters
+                    type: string
+                username:
+                    description: ''
+                    type: string
+        errorResponse:
+            title: Error response
+            description: Generic error response
+            type: object
+            properties:
+                error:
+                    description: Error response
+                    type: string
+            example:
+                error: Error message
