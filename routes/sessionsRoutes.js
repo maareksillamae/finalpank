@@ -12,15 +12,14 @@ router.post(
 
         // Validate a user with given username and password exists in the database
         try {
-            const {username, password}=req.body;
+            const {username, password} = req.body;
             // Checks if the username and/or password exists in the database before logging in
             const user = await Users.findOne({username});
-            if (!username || !password) return res.status(400).json({error: "Username and password required"})
+            if (!username || !password) return res.status(400).json({error: "Username and password required"});
 
+            if(!user) return res.status(400).json({error: "Invalid username or password"});
             const validPass = await bcrypt.compare(password, user.password);
-
-
-            if (!user || !validPass) return res.status(400).json({error: "Invalid username or password"});
+            if (!validPass) return res.status(400).json({error: "Invalid username or password"});
             // Creates a new Session in the database with an users userId
             const newSession = await Sessions.create({userId: user._id});
 
