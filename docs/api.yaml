@@ -146,6 +146,15 @@ paths:
                                 missingAuthorizationHeader:
                                     value:
                                         error: Missing Authorization header
+                                invalidHeaderFormat:
+                                    value:
+                                        error: Invalid Authorization header format
+                                invalidToken:
+                                    value:
+                                        error: Invalid token
+                                invalidMongooseToken:
+                                    value:
+                                        error: Invalid token
                     description: Missing token
                 '404':
                     content:
@@ -171,6 +180,72 @@ paths:
                 -
                     Bearer: []
             description: Delete session token
+    /api/accounts/current-user-account:
+        get:
+            tags:
+                - Account
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/successfulResponse'
+                            examples:
+                                successfulResponse:
+                                    value:
+                                        name: Maarek Sillamäe karel kivimägi
+                                        username: Maarek
+                                        account:
+                                            -
+                                                account_number: EE2650749058303131
+                                                balance: 50
+                                                currency: EUR
+                    description: Account information
+                '401':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                missingAuthorizationHeader:
+                                    value:
+                                        error: Missing Authorization header
+                                invalidHeaderFormat:
+                                    value:
+                                        error: Invalid Authorization header format
+                                invalidToken:
+                                    value: "\t{\"error\":\"Invalid token\"}"
+                                invalidMongooseToken:
+                                    value:
+                                        error: Invalid token
+                    description: |
+                        Missing token
+                '404':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                accountNotFound:
+                                    value:
+                                        error: Account not found
+                                userNotFound:
+                                    value:
+                                        error: User not found
+                    description: Not found
+                '500':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                oopsSomethingWentWrong:
+                                    value:
+                                        error: Oops! Something went wrong
+                    description: Server error
+            security:
+                -
+                    Bearer: []
 components:
     schemas:
         postUsersRequest:
@@ -197,10 +272,28 @@ components:
         errorResponse:
             title: Error response
             description: Generic error response
+            required:
+                - missingAuthorizationHeader
+                - error
+                - invalidHeaderFormat
+                - invalidToken
+                - invalidMongooseToken
             type: object
             properties:
                 error:
                     description: Error response
+                    type: string
+                missingAuthorizationHeader:
+                    description: '{"error":"Missing Authorization header"}'
+                    type: string
+                invalidHeaderFormat:
+                    description: "\t{\"error\":\"Invalid Authorization header format\"}"
+                    type: string
+                invalidToken:
+                    description: '{"error":"Invalid token"}'
+                    type: string
+                invalidMongooseToken:
+                    description: '{"error":"Invalid token"}'
                     type: string
             example:
                 error: Error message
@@ -234,6 +327,23 @@ components:
             type: object
             example:
                 message: Token successfully deleted
+        successfulResponse:
+            description: ''
+            required:
+                - successful
+            type: object
+            properties:
+                successful:
+                    description: Successful response
+                    type: string
+            example:
+                name: Maarek Sillamäe karel kivimägi
+                username: Maarek
+                account:
+                    -
+                        account_number: EE2650749058303131
+                        balance: 50
+                        currency: EUR
     securitySchemes:
         Bearer:
             scheme: bearer
