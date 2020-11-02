@@ -2,11 +2,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const userRoutes = require("./routes/userRoutes");
 const sessionRoutes = require("./routes/sessionsRoutes");
-const accountRoutes = require("./routes/accountRoutes")
+const accountRoutes = require("./routes/accountRoutes");
+const transactionRoutes = require("./routes/transactionRoutes");
 const swaggerUi = require('swagger-ui-express');
 const yaml = require('yamljs');
 const swaggerDocument = yaml.load('./docs/api.yaml');
 const { RequestHeadersHaveCorrectContentType, RequestBodyIsValidJson } = require('./middlewares/middlewares')
+
 
 // Start Express
 const app = express();
@@ -22,6 +24,7 @@ app.use(express.urlencoded({extended: true})); // Parse request body if's key=an
 app.use("/api/user", userRoutes);
 app.use("/api/session", sessionRoutes);
 app.use("/api/accounts", accountRoutes);
+app.use("/api/transactions", transactionRoutes);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Assigning port

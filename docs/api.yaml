@@ -246,6 +246,70 @@ paths:
             security:
                 -
                     Bearer: []
+    /api/transactions/create-transactions:
+        post:
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/postTransactionRequest'
+                        examples:
+                            createTransaction:
+                                value:
+                                    accountTo: 7da3851546037313641
+                                    explanation: raha
+                                    amount: 50
+                required: true
+            tags:
+                - Transactions
+            responses:
+                '201':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/successfulTransaction'
+                            examples:
+                                transactionSuccessful:
+                                    value:
+                                        message: Transaction created successfully
+                    description: Transaction created
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                invalidAmount:
+                                    value:
+                                        error: Invalid amount
+                                invalidAccountTo:
+                                    value:
+                                        error: Invalid accountTo
+                    description: Invalid amount
+                '401':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                missingAuthorizationHeader:
+                                    value:
+                                        error: Missing Authorization header
+                    description: Missing token
+                '402':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                insufficentFunds:
+                                    value:
+                                        error: Insufficient funds
+                    description: Insufficent funds
+            security:
+                -
+                    Bearer: []
+            description: Transactions API
 components:
     schemas:
         postUsersRequest:
@@ -278,6 +342,10 @@ components:
                 - invalidHeaderFormat
                 - invalidToken
                 - invalidMongooseToken
+                - insufficentFunds
+                - invalidAmount
+                - invalidAccountTo
+                - cannotTransferToYourself
             type: object
             properties:
                 error:
@@ -294,6 +362,18 @@ components:
                     type: string
                 invalidMongooseToken:
                     description: '{"error":"Invalid token"}'
+                    type: string
+                insufficentFunds:
+                    description: '{ "error": ''Insufficient funds'' }'
+                    type: string
+                invalidAmount:
+                    description: '{ "error": ''Invalid amount'' }'
+                    type: string
+                invalidAccountTo:
+                    description: '{ "error": ''Invalid accountTo'' }'
+                    type: string
+                cannotTransferToYourself:
+                    description: '{"error": "You cannot transfer to yourself"}'
                     type: string
             example:
                 error: Error message
@@ -344,6 +424,37 @@ components:
                         account_number: EE2650749058303131
                         balance: 50
                         currency: EUR
+        postTransactionRequest:
+            description: ''
+            required:
+                - accountTo
+                - amount
+                - explanation
+            type: object
+            properties:
+                accountTo:
+                    description: Reciever
+                    type: string
+                explanation:
+                    description: Transaction explanation
+                    type: string
+                amount:
+                    description: Fund amount
+                    type: integer
+            example:
+                accountTo: 7da3851546037313641
+                explanation: raha
+                amount: 50
+        successfulTransaction:
+            title: Root Type for successfulTransaction
+            description: ''
+            type: object
+            properties:
+                message:
+                    description: Success message
+                    type: string
+            example:
+                message: Transaction created successfully
     securitySchemes:
         Bearer:
             scheme: bearer

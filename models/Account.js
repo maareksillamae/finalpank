@@ -14,7 +14,7 @@ function generate(n) {
 const accountSchema = mongoose.Schema({
     accountNumber: {
         type: String,
-        default: "EE" + generate(16)
+        default: process.env.BANK_PREFIX + generate(16)
     },
     balance: {
         type: Number,

@@ -12,7 +12,7 @@ router.post(
 
         // Validate a user with given username and password exists in the database
         try {
-        const {username, password} = req.body;
+            const {username, password} = req.body;
             // Checks if the username and/or password exists in the database before logging in
             const user = await Users.findOne({username});
             if (!username || !password) return res.status(400).json({error: "Username and password required"});
