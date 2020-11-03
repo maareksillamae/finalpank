@@ -6,10 +6,6 @@ info:
     contact:
         name: Maarek Sillamäe karel kivimägi
         email: maarek.sillamae@khk.ee
-servers:
-    -
-        url: 'http://localhost:1337'
-        description: Development Server
 paths:
     /api/user/register:
         description: ''
@@ -118,12 +114,6 @@ paths:
             description: Create session token
     /api/session/delete-session:
         delete:
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/deleteSessionRequest'
-                required: true
             tags:
                 - Session
             responses:
@@ -256,6 +246,7 @@ paths:
                         examples:
                             createTransaction:
                                 value:
+                                    accountFrom: 7da3851546037313642
                                     accountTo: 7da3851546037313641
                                     explanation: raha
                                     amount: 50
@@ -310,6 +301,69 @@ paths:
                 -
                     Bearer: []
             description: Transactions API
+    /api/transactions/b2b:
+        post:
+            tags:
+                - Transactions
+            responses:
+                '200':
+                    description: Succesfully received transaction
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                parsingJwtFailed:
+                                    value:
+                                        error: Parsing JWT payload failed
+                                verifyAccountTo:
+                                    value:
+                                        error: Account not found
+                                bankNotFound:
+                                    value:
+                                        error: >-
+                                            The account sending the funds does not belong to a bank registered
+                                            in Central Bank
+                                cannotVerifyJwksSignature:
+                                    value:
+                                        error: 'Cannot verify your signature: The jwksUrl of your bank is invalid'
+                                invalidSignature:
+                                    value:
+                                        error: Invalid signature
+                    description: Returns the errors specified
+                '500':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                centralBankError:
+                                    value:
+                                        error: Central Bank error
+                                missingJwksUrl:
+                                    value:
+                                        error: 'Cannot verify your signature: The jwksUrl of your bank is missing'
+                    description: Returns the errors specified
+    /api/transactions/jwks:
+        get:
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/keys'
+                            examples:
+                                keys:
+                                    value:
+                                        keys:
+                                            -
+                                                kty: RSA
+                                                kid: h_s_zbvPAS1WB-ref6FF1_TIHANcpjPhV_xEk9WR6X4
+                                                'n': >-
+                                                    jdcp_0ewRa-dKQuqzSQD6nNsP8G-bfHcgl7fBshGCgznFYmGTiV2OuRQ1yIogdlfSBiQrol1P-IlfN1m5NKsR3iLw-PDOKFzoLf1fTQpuEZUsm5Ip-LpYgjCjjw8oOP7ZFqlkuR3XMj1rZYKiyhoRITxUZlz0v1LO1Wa736lO1E
+                                                e: AQAB
+                    description: Keys
 components:
     schemas:
         postUsersRequest:
@@ -417,7 +471,7 @@ components:
                     description: Successful response
                     type: string
             example:
-                name: Maarek Sillamäe karel kivimägi
+                name: Maarek sillamäe karel kivimägi
                 username: Maarek
                 account:
                     -
@@ -430,6 +484,7 @@ components:
                 - accountTo
                 - amount
                 - explanation
+                - accountFrom
             type: object
             properties:
                 accountTo:
@@ -441,7 +496,11 @@ components:
                 amount:
                     description: Fund amount
                     type: integer
+                accountFrom:
+                    description: Sender
+                    type: string
             example:
+                accountFrom: 7da3851546037313642
                 accountTo: 7da3851546037313641
                 explanation: raha
                 amount: 50
@@ -455,6 +514,73 @@ components:
                     type: string
             example:
                 message: Transaction created successfully
+        parsingJwtFailed:
+            description: ''
+            type: object
+            example:
+                error: Parsing JWT payload failed
+        verifyAccountTo:
+            title: Root Type for verifyAccountTo
+            description: ''
+            type: object
+            properties:
+                error:
+                    type: string
+            example:
+                error: Account not found
+        bankNotFound:
+            title: Root Type for bankNotFound
+            description: ''
+            type: object
+            properties:
+                error:
+                    type: string
+            example:
+                error: The account sending the funds does not belong to a bank registered in Central Bank
+        cannotVerifyJwksSignature:
+            title: Root Type for cannotVerifyJwksSignature
+            description: ''
+            type: object
+            properties:
+                error:
+                    type: string
+            example:
+                error: 'Cannot verify your signature: The jwksUrl of your bank is invalid'
+        invalidSignature:
+            title: Root Type for invalidSignature
+            description: ''
+            type: object
+            properties:
+                error:
+                    type: string
+            example:
+                error: Invalid signature
+        keys:
+            title: Root Type for keys
+            description: ''
+            type: object
+            properties:
+                keys:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            kty:
+                                type: string
+                            kid:
+                                type: string
+                            'n':
+                                type: string
+                            e:
+                                type: string
+            example:
+                keys:
+                    -
+                        kty: RSA
+                        kid: h_s_zbvPAS1WB-ref6FF1_TIHANcpjPhV_xEk9WR6X4
+                        'n': >-
+                            jdcp_0ewRa-dKQuqzSQD6nNsP8G-bfHcgl7fBshGCgznFYmGTiV2OuRQ1yIogdlfSBiQrol1P-IlfN1m5NKsR3iLw-PDOKFzoLf1fTQpuEZUsm5Ip-LpYgjCjjw8oOP7ZFqlkuR3XMj1rZYKiyhoRITxUZlz0v1LO1Wa736lO1E
+                        e: AQAB
     securitySchemes:
         Bearer:
             scheme: bearer

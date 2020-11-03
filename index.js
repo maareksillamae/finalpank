@@ -7,7 +7,7 @@ const transactionRoutes = require("./routes/transactionRoutes");
 const swaggerUi = require('swagger-ui-express');
 const yaml = require('yamljs');
 const swaggerDocument = yaml.load('./docs/api.yaml');
-const { RequestHeadersHaveCorrectContentType, RequestBodyIsValidJson } = require('./middlewares/middlewares')
+const { RequestHeadersHaveCorrectContentType, RequestBodyIsValidJson, processTransactions } = require('./middlewares/middlewares')
 
 
 // Start Express
@@ -39,6 +39,6 @@ mongoose.connect(process.env.MONGO_DB,
     },
     () => console.log('connected to DB!')
 );
-
+processTransactions();
 // Express app listening on port
 app.listen(port, () => console.log(`Express server is listening on PORT - ${port}`));

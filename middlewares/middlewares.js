@@ -1,6 +1,14 @@
 const mongoose = require('mongoose');
 const sessionModel = require('../models/Sessions');
 const accountModel = require('../models/Account');
+const transactionModel = require('../models/Transactions');
+const bankModel = require('../models/CentralBank');
+const fetch = require('node-fetch');
+const fs = require('fs');
+const jose = require('node-jose');
+const abortController = require('abort-controller');
+
+require('dotenv').config();
 
 exports.RequestBodyIsValidJson = (err, req, res, next) => {
     // body-parser will set this to 400 if the json is in error
@@ -214,7 +222,7 @@ exports.processTransactions = async() => {
         transaction.receiverName = serverResponseAsJson.receiverName
 
         // Deduct accountFrom
-        const accountFromBalance = await accountModel.findOne({ account_number: transaction.accountFrom })
+        const accountFromBalance = await accountModel.findOne({ accountNumber: transaction.accountFrom })
         accountFromBalance.balance = accountFromBalance.balance - transaction.amount
         accountFromBalance.save();
 
@@ -242,7 +250,7 @@ exports.refreshBanksFromCentralBank = async() => {
             headers: { 'Api-Key': process.env.CENTRAL_BANK_API_KEY }
         })
             .then(responseText => responseText.json())
-
+        console.log(banks);
         // Delete all old banks
         await bankModel.deleteMany()
 
