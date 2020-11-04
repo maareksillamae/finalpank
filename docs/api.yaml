@@ -7,66 +7,6 @@ info:
         name: Maarek Sillamäe karel kivimägi
         email: maarek.sillamae@khk.ee
 paths:
-    /api/user/register:
-        description: ''
-        post:
-            requestBody:
-                description: User created
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/postUsersRequest'
-                required: true
-            servers:
-                -
-                    url: 'http://localhost:1337'
-                    description: Development server
-            tags:
-                - User
-            responses:
-                '201':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/postUsersRequest'
-                            examples:
-                                userCreated:
-                                    value:
-                                        message: User saved
-                    description: User saved
-                '400':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/errorResponse'
-                            examples:
-                                userAlreadyExists:
-                                    value: '{error: "All fields must be filled"}'
-                                passwordLenght:
-                                    value:
-                                        error: Password length must be 8 or more characters
-                    description: All fields must be filled
-                '409':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/errorResponse'
-                            examples:
-                                usernameAlreadyExists:
-                                    value: '{error: "Username already exists"}'
-                    description: Username already exists
-                '500':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/errorResponse'
-                            examples:
-                                oopsSomethingWentWrong:
-                                    value:
-                                        error: Oops! Something went wrong
-                    description: Oops! Something went wrong
-            summary: Register a new user
-            description: Register a new user
     /api/session/create-session:
         post:
             requestBody:
@@ -347,6 +287,8 @@ paths:
                     description: Returns the errors specified
     /api/transactions/jwks:
         get:
+            tags:
+                - Transactions
             responses:
                 '200':
                     content:
@@ -364,6 +306,113 @@ paths:
                                                     jdcp_0ewRa-dKQuqzSQD6nNsP8G-bfHcgl7fBshGCgznFYmGTiV2OuRQ1yIogdlfSBiQrol1P-IlfN1m5NKsR3iLw-PDOKFzoLf1fTQpuEZUsm5Ip-LpYgjCjjw8oOP7ZFqlkuR3XMj1rZYKiyhoRITxUZlz0v1LO1Wa736lO1E
                                                 e: AQAB
                     description: Keys
+    /api/user/register:
+        description: ''
+        post:
+            requestBody:
+                description: User created
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/postUsersRequest'
+                required: true
+            tags:
+                - User
+            responses:
+                '201':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/postUsersRequest'
+                            examples:
+                                userCreated:
+                                    value:
+                                        message: User saved
+                    description: User saved
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                userAlreadyExists:
+                                    value: '{error: "All fields must be filled"}'
+                                passwordLenght:
+                                    value:
+                                        error: Password length must be 8 or more characters
+                    description: All fields must be filled
+                '409':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                usernameAlreadyExists:
+                                    value: '{error: "Username already exists"}'
+                    description: Username already exists
+                '500':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                oopsSomethingWentWrong:
+                                    value:
+                                        error: Oops! Something went wrong
+                    description: Oops! Something went wrong
+            summary: Register a new user
+            description: Register a new user
+    /api/transactions/transaction-history:
+        get:
+            tags:
+                - Transactions
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/successfulResponse'
+                            examples:
+                                successfulTransactionHistory:
+                                    value:
+                                        transactions:
+                                            createdAt: '2020-11-03T17:23:04.056Z'
+                                            status: completed
+                                            _id: 5fa19248f1ff7c46a80eeb5d
+                                            userId: 5fa18d06e11be12268b48733
+                                            amount: 500
+                                            currency: EUR
+                                            accountFrom: f896138686071081018
+                                            accountTo: f896138686071081017
+                                            explanation: raha
+                                            senderName: maarek
+                                            __v: 0
+                                            receiverName: maarek1
+                                            statusDetail: ''
+                    description: Successful transaction history
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                error:
+                                    value:
+                                        error: error
+                    description: error
+                '404':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                noLoggedTransactions:
+                                    value:
+                                        error: You have no logged transactions
+                    description: You have no logged transactions
+            security:
+                -
+                    Bearer: []
 components:
     schemas:
         postUsersRequest:
@@ -400,6 +449,7 @@ components:
                 - invalidAmount
                 - invalidAccountTo
                 - cannotTransferToYourself
+                - noLoggedTransactions
             type: object
             properties:
                 error:
@@ -429,8 +479,11 @@ components:
                 cannotTransferToYourself:
                     description: '{"error": "You cannot transfer to yourself"}'
                     type: string
+                noLoggedTransactions:
+                    description: '{ "error": "You have no logged transactions" }'
+                    type: string
             example:
-                error: Error message
+                error: error message
         postSessionResponse:
             description: ''
             type: object
@@ -465,13 +518,17 @@ components:
             description: ''
             required:
                 - successful
+                - successfulHistory
             type: object
             properties:
                 successful:
                     description: Successful response
                     type: string
+                successfulHistory:
+                    description: "{\r\n    \"transactions\": {\r\n        \"createdAt\": \"2020-11-03T17:23:04.056Z\",\r\n        \"status\": \"completed\",\r\n        \"_id\": \"5fa19248f1ff7c46a80eeb5d\",\r\n        \"userId\": \"5fa18d06e11be12268b48733\",\r\n        \"amount\": 500,\r\n        \"currency\": \"EUR\",\r\n        \"accountFrom\": \"f896138686071081018\",\r\n        \"accountTo\": \"f896138686071081017\",\r\n        \"explanation\": \"raha\",\r\n        \"senderName\": \"maarek\",\r\n        \"__v\": 0,\r\n        \"receiverName\": \"maarek1\",\r\n        \"statusDetail\": \"\"\r\n    }\r\n}"
+                    type: string
             example:
-                name: Maarek sillamäe karel kivimägi
+                name: Maarek Sillamäe karel kivimägi
                 username: Maarek
                 account:
                     -

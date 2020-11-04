@@ -11,7 +11,27 @@ const fetch = require('node-fetch');
 
 require('dotenv').config();
 
+router.get('/transaction-history', verifyToken, async(req, res) => {
+    try {
 
+
+        // Find the account associated with the user
+        const accountId = await accountModel.findOne({user: req.userId});
+
+        // Find all transactions
+        const sentTransaction = await transactionModel.findOne({ user: accountId.userId })
+
+        if (!sentTransaction) {
+            res.status(404).json({ error: "You have no logged transactions" });
+        } else {
+            console.log("Displaying transactions")
+            res.status(200).json({transactions: sentTransaction});
+        }
+
+    } catch (e) {
+        return res.status(400).json({error: "error"})
+    }
+})
 router.post('/create-transactions', verifyToken, async(req, res, next) => {
     let banks = [],
         statusDetail
