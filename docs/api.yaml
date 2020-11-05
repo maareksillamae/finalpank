@@ -7,113 +7,12 @@ info:
         name: Maarek Sillamäe karel kivimägi
         email: maarek.sillamae@khk.ee
 paths:
-    /api/session/create-session:
-        post:
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/postSessionRequest'
-                required: true
-            tags:
-                - Session
-            responses:
-                '200':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/postSessionResponse'
-                            examples:
-                                tokenHasBeenCreated:
-                                    value:
-                                        token: 5f9db108b8c28c40a42d94c4
-                    description: ''
-                '400':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/postSessionResponse'
-                            examples:
-                                userAndPwRequired:
-                                    value:
-                                        error: Username and password required
-                                invalidUsernameOrPassword:
-                                    value:
-                                        error: Invalid username or password
-                    description: Invalid username or password
-                '500':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/postSessionResponse'
-                            examples:
-                                oopsSomethingWentWrong:
-                                    value:
-                                        error: Oops! Something went wrong
-                    description: Oops! Something went wrong
-            description: Create session token
-    /api/session/delete-session:
-        delete:
-            tags:
-                - Session
-            responses:
-                '200':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/postSessionResponse'
-                            examples:
-                                deleteToken:
-                                    value:
-                                        message: Token successfully deleted
-                    description: Deleted token
-                '401':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/errorResponse'
-                            examples:
-                                missingAuthorizationHeader:
-                                    value:
-                                        error: Missing Authorization header
-                                invalidHeaderFormat:
-                                    value:
-                                        error: Invalid Authorization header format
-                                invalidToken:
-                                    value:
-                                        error: Invalid token
-                                invalidMongooseToken:
-                                    value:
-                                        error: Invalid token
-                    description: Missing token
-                '404':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/errorResponse'
-                            examples:
-                                sessionNotFound:
-                                    value:
-                                        error: Session not found
-                    description: Not found
-                '500':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/errorResponse'
-                            examples:
-                                oopsSomethingWentWrong:
-                                    value:
-                                        error: Oops! Something went wrong
-                    description: Server error
-            security:
-                -
-                    Bearer: []
-            description: Delete session token
-    /api/accounts/current-user-account:
+    /api/accounts:
+        summary: Account information
+        description: Account information
         get:
             tags:
-                - Account
+                - Accounts
             responses:
                 '200':
                     content:
@@ -176,7 +75,62 @@ paths:
             security:
                 -
                     Bearer: []
-    /api/transactions/create-transactions:
+            summary: Account information
+            description: Account information
+    /api/transactions:
+        summary: Make a transaction
+        description: Make a transaction
+        get:
+            tags:
+                - Transactions
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/successfulResponse'
+                            examples:
+                                successfulTransactionHistory:
+                                    value:
+                                        transactions:
+                                            createdAt: '2020-11-03T17:23:04.056Z'
+                                            status: completed
+                                            _id: 5fa19248f1ff7c46a80eeb5d
+                                            userId: 5fa18d06e11be12268b48733
+                                            amount: 500
+                                            currency: EUR
+                                            accountFrom: f896138686071081018
+                                            accountTo: f896138686071081017
+                                            explanation: raha
+                                            senderName: maarek
+                                            __v: 0
+                                            receiverName: maarek1
+                                            statusDetail: ''
+                    description: Successful transaction history
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                error:
+                                    value: "\t{\"error\":\"error\"}"
+                    description: Something happened
+                '404':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                noLoggedTransactions:
+                                    value:
+                                        error: You have no logged transactions
+                    description: You have no logged transactions
+            security:
+                -
+                    Bearer: []
+            summary: Get User transaction history
+            description: Get User transaction history
         post:
             requestBody:
                 content:
@@ -240,6 +194,7 @@ paths:
             security:
                 -
                     Bearer: []
+            summary: Make a transaction
             description: Transactions API
     /api/transactions/b2b:
         post:
@@ -306,7 +261,7 @@ paths:
                                                     jdcp_0ewRa-dKQuqzSQD6nNsP8G-bfHcgl7fBshGCgznFYmGTiV2OuRQ1yIogdlfSBiQrol1P-IlfN1m5NKsR3iLw-PDOKFzoLf1fTQpuEZUsm5Ip-LpYgjCjjw8oOP7ZFqlkuR3XMj1rZYKiyhoRITxUZlz0v1LO1Wa736lO1E
                                                 e: AQAB
                     description: Keys
-    /api/user/register:
+    /api/users/register:
         description: ''
         post:
             requestBody:
@@ -317,7 +272,7 @@ paths:
                             $ref: '#/components/schemas/postUsersRequest'
                 required: true
             tags:
-                - User
+                - Users
             responses:
                 '201':
                     content:
@@ -362,57 +317,106 @@ paths:
                     description: Oops! Something went wrong
             summary: Register a new user
             description: Register a new user
-    /api/transactions/transaction-history:
-        get:
+    /api/sessions:
+        post:
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/postSessionRequest'
+                required: true
             tags:
-                - Transactions
+                - Sessions
             responses:
                 '200':
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/successfulResponse'
+                                $ref: '#/components/schemas/postSessionResponse'
                             examples:
-                                successfulTransactionHistory:
+                                tokenHasBeenCreated:
                                     value:
-                                        transactions:
-                                            createdAt: '2020-11-03T17:23:04.056Z'
-                                            status: completed
-                                            _id: 5fa19248f1ff7c46a80eeb5d
-                                            userId: 5fa18d06e11be12268b48733
-                                            amount: 500
-                                            currency: EUR
-                                            accountFrom: f896138686071081018
-                                            accountTo: f896138686071081017
-                                            explanation: raha
-                                            senderName: maarek
-                                            __v: 0
-                                            receiverName: maarek1
-                                            statusDetail: ''
-                    description: Successful transaction history
+                                        token: 5f9db108b8c28c40a42d94c4
+                    description: ''
                 '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/postSessionResponse'
+                            examples:
+                                userAndPwRequired:
+                                    value:
+                                        error: Username and password required
+                                invalidUsernameOrPassword:
+                                    value:
+                                        error: Invalid username or password
+                    description: Invalid username or password
+                '500':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/postSessionResponse'
+                            examples:
+                                oopsSomethingWentWrong:
+                                    value:
+                                        error: Oops! Something went wrong
+                    description: Oops! Something went wrong
+            summary: Create session token
+            description: Create session token
+        delete:
+            tags:
+                - Sessions
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/postSessionResponse'
+                            examples:
+                                deleteToken:
+                                    value:
+                                        message: Token successfully deleted
+                    description: Deleted token
+                '401':
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/errorResponse'
                             examples:
-                                error:
+                                "missingAuthorizationHeader\t":
+                                    value: "\t{\"error\":\"Missing Authorization header\"}"
+                                invalidHeaderFormat:
+                                    value: "\t{\"error\":\"Invalid Authorization header format\"}"
+                                invalidToken:
+                                    value: "\t{\"error\":\"Invalid token\"}"
+                                invalidMongooseToken:
                                     value:
-                                        error: error
-                    description: error
+                                        error: Invalid token
+                    description: Missing token
                 '404':
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/errorResponse'
                             examples:
-                                noLoggedTransactions:
+                                sessionNotFound:
                                     value:
-                                        error: You have no logged transactions
-                    description: You have no logged transactions
+                                        error: Session not found
+                    description: Token not found
+                '500':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/errorResponse'
+                            examples:
+                                oopsSomethingWentWrong:
+                                    value: "\t{\"error\":\"Oops! Something went wrong\"}"
+                    description: Server error
             security:
                 -
                     Bearer: []
+            summary: Delete session token
+            description: Delete session token
 components:
     schemas:
         postUsersRequest:
